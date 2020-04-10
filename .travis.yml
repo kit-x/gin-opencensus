@@ -15,7 +15,7 @@ matrix:
 env:
   - GO111MODULE=on
 
-go_import_path: github.com/kit-x/opencensus-gin
+go_import_path: github.com/kit-x/gin-opencensus
 
 script:
   - make travis-ci
