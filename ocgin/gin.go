@@ -28,7 +28,6 @@ func HandlerFunc(opts ...TraceOption) gin.HandlerFunc {
 		startOptions := append(
 			make([]trace.StartOption, 0, 3),
 			trace.WithSpanKind(trace.SpanKindServer),
-			trace.WithSampler(opt.sample(c)),
 		)
 		if opt.sample != nil {
 			startOptions = append(startOptions, trace.WithSampler(opt.sample(c)))
