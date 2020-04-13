@@ -162,3 +162,40 @@ func TestWithPublicEndPoint(t *testing.T) {
 		})
 	}
 }
+
+func TestDefaultOptions(t *testing.T) {
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+	exporter := &spanExporter{cur: make([]*trace.SpanData, 0, 2)}
+	trace.RegisterExporter(exporter)
+	defer trace.UnregisterExporter(exporter)
+
+	tests := []struct {
+		path       string
+		wantSample bool
+		message    string
+	}{
+		{path: "/test", wantSample: true, message: "sample success"},
+	}
+
+	for i, tt := range tests {
+		t.Run(tt.message, func(t *testing.T) {
+			e := gin.Default()
+			e.Use(HandlerFunc())
+			e.GET(tt.path, func(c *gin.Context) {
+				c.AbortWithStatus(http.StatusOK)
+			})
+			ctx := context.Background()
+			w := httptest.NewRecorder()
+			req, _ := http.NewRequest("GET", tt.path, nil)
+			req = req.WithContext(ctx)
+			e.ServeHTTP(w, req)
+			var got bool
+			if len(exporter.cur) > i && exporter.cur[i].IsSampled() {
+				got = true
+			}
+			if got != tt.wantSample {
+				t.Fatalf("%s sample status wrong, want %v", tt.path, tt.wantSample)
+			}
+		})
+	}
+}
