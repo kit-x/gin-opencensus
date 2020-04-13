@@ -26,4 +26,4 @@ travis-ci: test
 
 .PHONY: test
 test:
-	$(GOTEST) $(GOTEST_OPT) $(ALL_PKGS)
+	$(GOTEST) $(GOTEST_OPT) -coverprofile=coverage.txt -covermode=atomic $(ALL_PKGS)
