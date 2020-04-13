@@ -28,13 +28,13 @@ func HandlerFunc(opts ...TraceOption) gin.HandlerFunc {
 		startOptions := append(
 			make([]trace.StartOption, 0, 2),
 			trace.WithSpanKind(trace.SpanKindServer),
-			trace.WithSampler(opt.Sample(c)),
+			trace.WithSampler(opt.sample(c)),
 		)
 
 		// Code reference https://github.com/census-instrumentation/opencensus-go/blob/master/plugin/ochttp/server.go
 		var span *trace.Span
 		sc, ok := _defaultFormat.SpanContextFromRequest(c.Request)
-		if ok && !opt.IsPublicEndpoint {
+		if ok && !opt.isPublicEndpoint {
 			ctx, span = trace.StartSpanWithRemoteParent(ctx, name, sc, startOptions...)
 		} else {
 			ctx, span = trace.StartSpan(c.Request.Context(), name, startOptions...)
@@ -49,7 +49,7 @@ func HandlerFunc(opts ...TraceOption) gin.HandlerFunc {
 		}
 		defer span.End()
 
-		attrs := append(requestAttrs(c), opt.DefaultAttributes...)
+		attrs := append(requestAttrs(c), opt.defaultAttributes...)
 		span.AddAttributes(attrs...)
 		if c.Request.Body != nil && c.Request.ContentLength > 0 {
 			span.AddMessageReceiveEvent(0,
