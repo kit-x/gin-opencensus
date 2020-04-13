@@ -26,10 +26,13 @@ func HandlerFunc(opts ...TraceOption) gin.HandlerFunc {
 		name := formatSpanName(c)
 
 		startOptions := append(
-			make([]trace.StartOption, 0, 2),
+			make([]trace.StartOption, 0, 3),
 			trace.WithSpanKind(trace.SpanKindServer),
 			trace.WithSampler(opt.sample(c)),
 		)
+		if opt.sample != nil {
+			startOptions = append(startOptions, trace.WithSampler(opt.sample(c)))
+		}
 
 		// Code reference https://github.com/census-instrumentation/opencensus-go/blob/master/plugin/ochttp/server.go
 		var span *trace.Span

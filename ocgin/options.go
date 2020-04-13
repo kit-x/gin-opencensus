@@ -25,9 +25,6 @@ type TraceOptions struct {
 var _defaultOptions = TraceOptions{
 	defaultAttributes: []trace.Attribute{},
 	isPublicEndpoint:  false,
-	sample: func(c *gin.Context) trace.Sampler {
-		return trace.ProbabilitySampler(0.001)
-	},
 }
 
 // WithDefaultAttributes will be set to each span as default.
@@ -37,12 +34,14 @@ func WithDefaultAttributes(attrs ...trace.Attribute) TraceOption {
 	}
 }
 
+// WithPublicEndpoint receive true when server is public
 func WithPublicEndpoint(isPublic bool) TraceOption {
 	return func(o *TraceOptions) {
 		o.isPublicEndpoint = isPublic
 	}
 }
 
+// WithSample receive a function with gin.Context to decide sample with each request
 func WithSample(f func(c *gin.Context) trace.Sampler) TraceOption {
 	return func(o *TraceOptions) {
 		o.sample = f
