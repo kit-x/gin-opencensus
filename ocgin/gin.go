@@ -51,6 +51,8 @@ func HandlerFunc(opts ...TraceOption) gin.HandlerFunc {
 		}
 		defer span.End()
 
+		c.Writer.Header().Set(b3.TraceIDHeader, span.SpanContext().TraceID.String())
+
 		attrs := append(requestAttrs(c), opt.defaultAttributes...)
 		span.AddAttributes(attrs...)
 		if c.Request.Body != nil && c.Request.ContentLength > 0 {
@@ -60,8 +62,6 @@ func HandlerFunc(opts ...TraceOption) gin.HandlerFunc {
 		c.Request = c.Request.WithContext(ctx)
 
 		c.Next()
-
-		c.Header(b3.TraceIDHeader, span.SpanContext().TraceID.String())
 
 		statusCode := c.Writer.Status()
 		span.AddAttributes(trace.Int64Attribute(ochttp.StatusCodeAttribute, int64(statusCode)))
